@@ -1,0 +1,7 @@
+services:
+  expr:
+    build: .
+    volumes:
+      - ./input.txt:/app/input.txt
+      - ./output.txt:/app/output.txt
+      - ./time.txt:/app/time.txt
