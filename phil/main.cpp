@@ -45,7 +45,7 @@ static DWORD WINAPI philosopher(void* args) {
 
     while (true) {
         Sleep(g_phil);
-        if (timenow_ms() - g_start >= g_total) 
+        if (timenow_ms() - g_start >= g_total)
             break;
 
         WaitForSingleObject(g_mutex, INFINITE);
@@ -53,9 +53,32 @@ static DWORD WINAPI philosopher(void* args) {
         try_eat(index);
         ReleaseMutex(g_mutex);
 
-        WaitForSingleObject(g_event[index], INFINITE);
+        DWORD res = WaitForSingleObject(g_event[index], (DWORD)g_phil);
+
+        if (res == WAIT_TIMEOUT) {
+            WaitForSingleObject(g_mutex, INFINITE);
+            if (g_state[index] == HUNGRY) {
+                g_state[index] = THINKING;
+                try_eat(LEFT(index));
+                try_eat(RIGHT(index));
+            } 
+            
+            else {
+                print_state(index, 'T', 'E');
+                ReleaseMutex(g_mutex);
+                Sleep(g_phil);
+                WaitForSingleObject(g_mutex, INFINITE);
+                g_state[index] = THINKING;
+                print_state(index, 'E', 'T');
+                try_eat(LEFT(index));
+                try_eat(RIGHT(index));
+            }
+
+            ReleaseMutex(g_mutex);
+            break;
+        }
+
         print_state(index, 'T', 'E');
-        
         Sleep(g_phil);
 
         WaitForSingleObject(g_mutex, INFINITE);
