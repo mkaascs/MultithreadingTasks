@@ -116,8 +116,8 @@ static DWORD WINAPI worker(void*) {
             break;
         }
 
-        g_tasks.pop();
         Task* task = g_tasks.front();
+        g_tasks.pop();
         LeaveCriticalSection(&g_critical_section);
 
         if (task->numbers == nullptr) break;
@@ -127,7 +127,7 @@ static DWORD WINAPI worker(void*) {
             seq_sort(task->numbers, task->left, task->right);
             finish_task(task);
             free(task);
-            break;
+            continue;
         }
 
         int pivot = partition(task->numbers, task->left, task->right);
@@ -176,8 +176,7 @@ int main() {
 
     DWORD end_time = GetTickCount();
 
-    for (int index = 0; index < T; index++)
-        submit_task(nullptr, 0, 0);
+    ReleaseSemaphore(g_work, T, nullptr);
 
     WaitForMultipleObjects(T, threads, TRUE, INFINITE);
     for (int index = 0; index < T; index++)
