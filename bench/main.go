@@ -18,7 +18,7 @@ const maxGoroutines = 3
 type Bench struct {
 	Name        string
 	DockerImage string
-	DockerPath  string
+	Path        string
 	Threads     []int
 	Inputs      []Input
 }
@@ -117,7 +117,8 @@ func runBench(b Bench, results chan<- Result, wg *sync.WaitGroup) {
 					data = strconv.Itoa(t) + "\n" + lines[1]
 				}
 
-				ms, err := runOnceDocker(b.DockerImage, b.DockerPath, data)
+				ms, err := runOnceDocker(b.DockerImage, b.Path, data)
+
 				r := Result{BenchName: b.Name, Label: inp.Label, Threads: t, Ms: ms}
 				if err != nil {
 					r.Err = err.Error()
@@ -192,8 +193,7 @@ func main() {
 		}
 	}
 
-	sortNs := []int{100_000, 500_000, 1_000_000, 2_000_000, 3_000_000,
-		5_000_000, 7_000_000, 8_000_000, 9_000_000, 10_000_000}
+	sortNs := []int{1_000_000, 2_000_000, 3_000_000, 5_000_000, 7_000_000, 8_000_000, 9_000_000, 10_000_000, 20_000_000, 30_000_000}
 
 	sortInputs := make([]Input, len(sortNs))
 	for i, n := range sortNs {
@@ -205,17 +205,19 @@ func main() {
 	}
 
 	benches := []Bench{
-		{
-			Name:        "expr",
-			DockerImage: "expr-image",
-			DockerPath:  "/app/expr",
-			Threads:     threads,
-			Inputs:      exprInputs,
-		},
+		/*
+			{
+				Name:        "expr",
+				DockerImage: "expr-image",
+				Path:        "/app/expr",
+				Threads:     threads,
+				Inputs:      exprInputs,
+			},
+		*/
 		{
 			Name:        "msort",
 			DockerImage: "msort-image",
-			DockerPath:  "/app/msort",
+			Path:        "/app/msort",
 			Threads:     threads,
 			Inputs:      sortInputs,
 		},
