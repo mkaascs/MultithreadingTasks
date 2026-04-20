@@ -3,4 +3,5 @@ cmake-build-debug/
 .vscode/
 CMakeLists.txt
 *.docx
+~$Отчет.docx
 bench-result.txt
