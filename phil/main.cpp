@@ -60,9 +60,27 @@ static DWORD WINAPI philosopher(void* arg) {
         try_eat(index);
         ReleaseMutex(g_mutex);
 
-        WaitForSingleObject(g_event[index], INFINITE);
+        LONGLONG remaining = (LONGLONG)g_total - (timenow_ms() - g_start);
+        DWORD wait_ms = remaining > 0 ? (DWORD)remaining : 0;
+        DWORD res = WaitForSingleObject(g_event[index], wait_ms);
+
+        if (res == WAIT_TIMEOUT) {
+            WaitForSingleObject(g_mutex, INFINITE);
+            if (g_state[index] == HUNGRY) {
+                g_state[index] = THINKING;
+                try_eat(LEFT(index));
+                try_eat(RIGHT(index));
+            }
+            ReleaseMutex(g_mutex);
+            break;
+        }
 
         if (timenow_ms() - g_start >= g_total) {
+            WaitForSingleObject(g_mutex, INFINITE);
+            g_state[index] = THINKING;
+            try_eat(LEFT(index));
+            try_eat(RIGHT(index));
+            ReleaseMutex(g_mutex);
             break;
         }
 

@@ -5,3 +5,4 @@ CMakeLists.txt
 *.docx
 ~$Отчет.docx
 bench-result.txt
+.claude
